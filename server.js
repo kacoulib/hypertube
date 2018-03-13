@@ -23,7 +23,7 @@ database.connect()
 
 	// configuration =============================================================
 
-	//require('./Middlewares/auth.js')(passport, con);
+	//require('./Middlewares/auth.js')(passport);
 
 	app.use((req, res,next)=>
 	{

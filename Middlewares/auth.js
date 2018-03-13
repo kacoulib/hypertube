@@ -3,8 +3,7 @@
 let bcrypt				= require('bcrypt-nodejs'),
 		localStrategy	= require('passport-local').Strategy,
 		User 					= require('../Models/User/user.js'),
-		userUtils			= require('../Utils/userDataValidator'),
-		dataUtils			= require('../Utils/dataValidator');
+		saltRounds		= 10;
 
 
 module.exports = function (passport)
@@ -19,9 +18,9 @@ module.exports = function (passport)
 
     passport.deserializeUser(function(id, next)
     {
-        User.findById(id)
-					.then((user)=>next(null, user))
-					.catch((err)=> next(err, null));
+        User.findById(id, function(err, user) {
+            next(err, user);
+        });
     });
 
 
@@ -30,34 +29,30 @@ module.exports = function (passport)
     // =========================================================================
 	passport.use('local-signin', new localStrategy(
 	{
-		usernameField: 'loginOrEmail',
+		usernameField: 'email',
 		passwordField: 'password',
 		passReqToCallback : true // allows us to pass back the entire request to the callback
 
 	},
-	function(req, loginOrEmail, password, next)
+	function(req, email, password, next)
 	{
-		User.findByLoginOrEmail(loginOrEmail, loginOrEmail)
-		.then((user)=>
+		User.findOne({ 'email': email}, function(err, user)
 		{
-			if (!user || !user[0])
-				return next({message: 'Incorrect login or email.' });
+			if (err)
+				return next(err);
 
-			if (user[0].is_lock == 'true')
-				return next({ message: 'Sorry but your account is lock.' });
+			if (!user)
+				return next(null, false, { message: 'Incorrect email.' });
 
-			bcrypt.compare(password, user[0].password, (err, res)=>
-			{
+			if (!user.validPassword(password))
+				return next(null, false, 'Oops! Wrong password.');
+
 				if (err)
-					return next({ message: 'Password error.' });
+					return next(err);
+				req.session.user = user;
 
-				if (res == false)
-					return next({ message: 'Oops! Wrong password.'});
-
-				return next(null, user[0]);
-			})
-		})
-		.catch((err)=>next({message: 'Incorrect login or email.'}))
+				return next(null, user);
+		});
 	}));
 
     // =========================================================================
@@ -68,45 +63,48 @@ module.exports = function (passport)
 		// by default, local strategy uses username and password, we will override with email
 		usernameField : 'email',
 		passwordField : 'password',
-		passReqToCallback : true
+		passReqToCallback : true,
+		session: false
 	},
 	function(req, email, password, next)
 	{
+		console.log('local-signup')
 		// asynchronous
 		// User.findOne wont fire unless data is sent back
 		process.nextTick(function()
 		{
-			// create the user
-			let new_user = userUtils.cleanNewUser(req.body);
-
-			if (!dataUtils.is_new_user_valid(new_user))
-				return next(null, false, 'Invalid data');
-
-
-			User.findByLoginOrEmail(new_user.login, new_user.email)
-			.then((err)=>{next(null, false, { message: 'The email or login provided is already taken.' })})
-			.catch((user)=>
+			User.findOne({ 'email' :  email }, function(err, user)
 			{
-				new_user.status = 'online';
+				// if there are any errors
+				if (err)
+					return next(err);
 
-				bcrypt.hash(new_user.password, bcrypt.genSaltSync(8), null, (err, salt)=>
+				// if theres email exist
+				if (user)
+					return next(null, false, 'That email is already taken.');
+				// if there is no user with that email
+				// create the user
+				let newUser	= new User(
+				{
+					age			: req.body.age,
+					gender		: req.body.gender,
+					adresses	: req.body.adresses,
+					orientation	: req.body.orientation,
+					location	: req.body.location,
+					bio			: req.body.bio,
+					email		: req.body.email
+				});
+				newUser.password = newUser.generateHash(password)
+				// save the new user
+				newUser.save(function(err)
 				{
 					if (err)
-						return next(null, false, { message: 'Error.' });
+						throw err;
 
-						new_user.password = salt;
-
-						// save the new user
-						User.add(new_user)
-						.then((new_user_id)=>
-						{
-							new_user.id = new_user_id;
-
-							return next(null, new_user);
-						})
-						.catch((err)=> next(err, false, { message: 'User insertion Error.' }));
-				})
-			})
-		})
+					console.log('User succefully create');
+					return next(null, newUser);
+				});
+			});
+		});
 	}))
 }
