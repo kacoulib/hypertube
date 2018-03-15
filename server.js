@@ -3,6 +3,7 @@
 const	express			= require('express'),
 		session				= require('express-session'),
 		app						= express(),
+		router				= express.Router(),
 		database			= require('./Models/database.js'),
 		cookieParser	= require('cookie-parser'),
 		bodyParser		= require('body-parser'),
@@ -22,8 +23,6 @@ database.connect()
 
 
 	// configuration =============================================================
-
-	//require('./Middlewares/auth.js')(passport);
 
 	app.use((req, res,next)=>
 	{
@@ -86,7 +85,9 @@ database.connect()
 	});
 
 	// routes ====================================================================
-	//require('./Routes/users.js')(app, passport, con);
+
+	require('./Middlewares/auth.js')(passport);
+	require('./Routes/users.js')(app, passport);
 })
 .catch((err)=>{console.log('______________');throw err})
 

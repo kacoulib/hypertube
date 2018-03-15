@@ -6,6 +6,7 @@ const nodemailer	= require('nodemailer'),
 			jwt 				= require('../Middlewares/jwt.js'),
 			dataUtils		= require('../Utils/dataValidator'),
 			userUtils		= require('../Utils/userDataValidator'),
+			mailUtils		= require('../Utils/mail'),
 			uploadUtils	= require('../Utils/upload'),
 			bcrypt			= require('bcrypt-nodejs');
 
@@ -20,6 +21,15 @@ module.exports = function (app, passport, con)
 
 	app.post('/send_password_reset_mail', (req, res) =>
 	{
+
+		mailUtils.reset_pass()
+		.then(res=> console.log(res))
+		.catch(err=> {throw err})
+		res.json({message: 'An email has been sent to you with an link.\nplease follow the link inside it.'});
+
+		return (false);
+
+
 		User.findOne({email: req.body.email}, (err, user)=>
 		{
 			if (err)
@@ -64,6 +74,7 @@ module.exports = function (app, passport, con)
 
 	app.post('/reset_pass', (req, res) =>
 	{
+		console.log('ok')
 		if (!req.body.reset_pass)
 			return (res.status(401).json({sucess: false, message: 'User no found'}));
 

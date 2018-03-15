@@ -44,6 +44,7 @@ userSchema 	= new Schema(
 	},
 	picture:
 	{
+		required: true,
 		type :[String],
 		validate : (pics) => pics.length < 5
 	},
