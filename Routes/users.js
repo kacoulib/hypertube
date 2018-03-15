@@ -4,7 +4,6 @@ const nodemailer	= require('nodemailer'),
 			User				= require('../Models/User/user'),
 			crypto			= require('crypto'),
 			jwt 				= require('../Middlewares/jwt.js'),
-			dataUtils		= require('../Utils/dataValidator'),
 			userUtils		= require('../Utils/userDataValidator'),
 			mailUtils		= require('../Utils/mail'),
 			uploadUtils	= require('../Utils/upload'),
@@ -168,9 +167,6 @@ module.exports = function (app, passport, con)
 	.put('/user', (req, res, next)=>
 	{
 		let new_user = userUtils.cleanUpdateUser(req.body);
-
-		if (!dataUtils.is_update_user_valid(new_user))
-			return (res.status(401).json({sucess: false, message: 'Invalid data'}));
 
 
 		User.findByLogin(new_user.login, con)
