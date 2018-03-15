@@ -1,106 +1,74 @@
 'use strict'
+let	mongoose		= require('mongoose'),
+	bcrypt			= require('bcrypt-nodejs'),
+	Schema			= mongoose.Schema,
+	userSchema;
 
-let dataValidator = require('../../Utils/dataValidator.js');
 
-module.exports =
+// Schema
+//email, pseudo, photo, nom, prénom, passe, pass_reset
+userSchema 	= new Schema(
 {
-	all: (limit, offset, con)=>
+	first_name:
 	{
-		return new Promise((resolve, reject)=>
-		{
-			if (!dataValidator.is_valid_db_id(limit) || !dataValidator.is_valid_db_id(offset))
-				return (reject('Invalid limit or offset'));
-
-			limit	 = parseInt(limit);
-			offset = parseInt(offset);
-
-			con.query(' SELECT id, first_name, last_name, login, email, age, nb_image, profile_image, gender, orientation, bio, status, is_lock, reset_pass FROM User LIMIT ? OFFSET ?', [limit, offset], (err, user)=>
-			{
-					if (err)
-						return (reject(err));
-
-					return (resolve(user));
-			})
-		})
+		required: true,
+		type: String,
+		lowercase: true,
+		trim: true,
+		validate: (str) => str.length > 2 && str.indexOf('$') < 0
 	},
-
-	findById: (id, con)=>
+	last_name:
 	{
-		return new Promise((resolve, reject)=>
-		{
-			if (!dataValidator.is_valid_db_id(id))
-				return reject('Not a valid user');
-
-			con.query('SELECT * FROM User WHERE id = ?', [id], (err, user)=>
-			{
-					if (err)
-						return (reject(err));
-					if (!user[0])
-					return (reject('No user found'));
-
-					return (resolve(user));
-			})
-		})
+		required: true,
+		type: String,
+		lowercase: true,
+		trim: true,
+		validate: (str) => str.length > 2 && str.indexOf('$') < 0
 	},
-
-	findByLogin: (login, con)=>
+	password:
 	{
-		return new Promise((resolve, reject)=>
-		{
-			con.query('select * from User where login = ?', [login], (err, user)=>
-			{
-					if (err)
-						return (reject(err));
-					if (!user[0])
-						return (reject('No user found'));
-
-					return (resolve(user));
-			})
-		})
+		required : true,
+		type : String,
+		validate: (str) => str.length > 2
 	},
-
-	findByLoginOrEmail: (login, email, con)=>
+	email:
 	{
-		return new Promise((resolve, reject)=>
+		required: true,
+		type : String,
+		index: {unique: true},
+		validate:
 		{
-			con.query('select * from User where login = ? or email = ?', [login, email], (err, user)=>
-			{
-					if (err)
-						return (reject(err));
-					if (!user[0])
-						return (reject('No user found'));
-
-					return (resolve(user));
-			})
-		})
+			validator: (email) =>  /^[a-zA-Z0-9._-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(email),
+			message : 'Invalid adress mail'
+		},
 	},
-
-	add: (new_user, con)=>
+	picture:
 	{
-		return new Promise((resolve, reject)=>
-		{
-			con.query('INSERT INTO User SET ?', new_user, (err, user)=> (err ? reject(err) : resolve(user.insertId)));
-		})
+		type :[String],
+		validate : (pics) => pics.length < 5
 	},
-
-	update: (new_user, con)=>
+	reset_pass:
 	{
-		delete new_user.id;
+		type : String,
+		default: null
+	}
+});
 
-		return new Promise((resolve, reject)=>
-		{
-			con.query('UPDATE User SET ? WHERE login = ?', [new_user, new_user.login], (err, user)=> (err ? reject(err) : resolve()));
-		})
-	},
-
-	delete: (id, con)=>
-	{
-		return new Promise((resolve, reject)=>
-		{
-			if (!dataValidator.is_valid_db_id(id))
-				return reject('Not a valid user');
-
-			con.query('DELETE FROM User WHERE id = ?', [id], (err, user)=>(err || user.affectedRows < 1 ? reject(err) : resolve(user.insertId)));
-		})
-	},
+userSchema.methods.generateHash = function(password)
+{
+    return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
 };
+
+// checking if password is valid
+userSchema.methods.validPassword = function(password)
+{
+
+	if (password != null)
+	{
+    	return bcrypt.compareSync(password, this.password);
+	}
+    else
+    	return (false);
+};
+
+module.exports = mongoose.model('User', userSchema);
