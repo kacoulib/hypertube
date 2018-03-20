@@ -13,6 +13,10 @@ const nodemailer	= require('nodemailer'),
 module.exports = function (app, passport, con)
 {
 
+	app.get('/home', (req, res) => {
+		res.send('../Views/home');
+	})
+
 
 	/*	====================================
 	 		============= EMAIL ================
