@@ -71,7 +71,7 @@ database.connect()
 		 token = token.replace('Bearer ', '');
 
 	   jwt.verify(token, process.env.JWT_SECRET, function(err, user)
-		 {
+		{
 	     if (err) {
 	       return res.status(401).json({
 	         success: false,
@@ -88,6 +88,7 @@ database.connect()
 
 	require('./Middlewares/auth.js')(passport);
 	require('./Routes/users.js')(app, passport);
+	require('./Routes/stream.js')(app);
 })
 .catch((err)=>{console.log('______________');throw err})
 

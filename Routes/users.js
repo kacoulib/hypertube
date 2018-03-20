@@ -1,13 +1,13 @@
 'use strict'
 
 const nodemailer	= require('nodemailer'),
-			User				= require('../Models/User/user'),
-			crypto			= require('crypto'),
-			jwt 				= require('../Middlewares/jwt.js'),
-			userUtils		= require('../Utils/userDataValidator'),
-			mailUtils		= require('../Utils/mail'),
-			uploadUtils	= require('../Utils/upload'),
-			bcrypt			= require('bcrypt-nodejs');
+		User		= require('../Models/User/user'),
+		crypto		= require('crypto'),
+		jwt 		= require('../Middlewares/jwt.js'),
+		userUtils	= require('../Utils/userDataValidator'),
+		mailUtils	= require('../Utils/mail'),
+		uploadUtils	= require('../Utils/upload'),
+		bcrypt		= require('bcrypt-nodejs');
 
 
 module.exports = function (app, passport, con)
