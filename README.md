@@ -10,7 +10,7 @@
 
 ## Torent
 
-### npm torrent package documentation:
+### Npm torrent package documentation:
 * https://www.npmjs.com/package/torrent-stream
 
 ### Stream a video file with nodejs:
