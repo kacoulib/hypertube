@@ -142,17 +142,3 @@ module.exports = function (passport)
 		}
 	));
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

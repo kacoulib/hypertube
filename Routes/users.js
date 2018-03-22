@@ -4,6 +4,7 @@ const nodemailer	= require('nodemailer'),
 		User		= require('../Models/User/user'),
 		crypto		= require('crypto'),
 		jwt 		= require('../Middlewares/jwt.js'),
+		customAuth 	= require('../Middlewares/customAuth.js'),
 		userUtils	= require('../Utils/userDataValidator'),
 		mailUtils	= require('../Utils/mail'),
 		uploadUtils	= require('../Utils/upload'),
@@ -106,32 +107,32 @@ module.exports = function (app, passport, con)
 		====================================  */
 
 
-		app.post('/sign_in', (req, res, next) =>
+	app.post('/sign_in', (req, res, next) =>
+	{
+		passport.authenticate('local-signin', (err, user, errMessage)=>
 		{
-			passport.authenticate('local-signin', (err, user, errMessage)=>
-			{
-				if (err)
-					return (res.status(401).json({sucess: false, err}));
+			if (err)
+				return (res.status(401).json({sucess: false, err}));
 
-				let new_user = userUtils.cleanNewUser(user),
-					token = jwt.generateToken(new_user);
+			let new_user = userUtils.cleanNewUser(user),
+				token = jwt.generateToken(new_user);
 
-				res.json({
-					sucess: true,
-					user: new_user,
-					token: token
-				})
-			})(req, res, next);
-		})
+			res.json({
+				sucess: true,
+				user: new_user,
+				token: token
+			})
+		})(req, res, next);
+	})
 
-		app.get('/logout', function(req, res)
-		{
-			console.log((req.session.user ? req.session.user.name.first : '...') + ' logout')
-			delete req.session.user;
-			req.logout();
-			// res.redirect('/');
-			res.send('user logout successfuly');
-		});
+	app.get('/logout', function(req, res)
+	{
+		console.log((req.session.user ? req.session.user.name.first : '...') + ' logout')
+		delete req.session.user;
+		req.logout();
+		// res.redirect('/');
+		res.send('user logout successfuly');
+	});
 
 	app.get('/user/auth/google', (req, res, next) =>
 	{
@@ -143,6 +144,19 @@ module.exports = function (app, passport, con)
 			res.json({succes: true, message: 'User authenticated successfuly'});
 
 		})(req, res, next);
+	})
+
+	app.get('/user/auth/42', (req, res, next) =>
+	{
+		let code;
+		//return  true;
+		console.log(customAuth.auth42)
+		customAuth.auth42({code}, (err)=>
+		{
+			console.log(2)
+			if (err)
+				return (res.status(401).json({sucess: false, err}));
+		})
 	})
 
 
