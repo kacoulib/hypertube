@@ -102,8 +102,8 @@ module.exports = function (app, passport, con)
 
 
 	/*	====================================
-	 		SIGN IN =================== SIGN out
-			====================================  */
+ 		SIGN IN =================== SIGN out
+		====================================  */
 
 
 		app.post('/sign_in', (req, res, next) =>
@@ -133,9 +133,27 @@ module.exports = function (app, passport, con)
 			res.send('user logout successfuly');
 		});
 
+	app.get('/user/auth/google', (req, res, next) =>
+	{
+		passport.authenticate('google', {scope: ['profile', 'email']}, (err, user)=>
+		{
+			if (err)
+				return (res.status(401).json({sucess: false, err}));
+
+			res.json({succes: true, message: 'User authenticated successfuly'});
+
+		})(req, res, next);
+	})
+
+
+
+
+
+
+
 		/*	====================================
-				============= USER CRUD ============
-				====================================  */
+			============= USER CRUD ============
+			====================================  */
 
 
 	app.post('/user', (req, res, next) =>

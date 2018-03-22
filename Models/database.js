@@ -2,7 +2,8 @@
 
 const mongoose  = require('mongoose'),
       dotenv    = require('dotenv').config(),
-      url       = 'mongodb://'+process.env.DB_USER+':'+process.env.DB_PASSWORD+'@ds159187.mlab.com:59187/hypertube';
+      url       = 'mongodb://'+process.env.DB_USER+':'+process.env.DB_PASSWORD+'@ds111279.mlab.com:11279/hypertube';
+
 
 module.exports	=
 {
@@ -10,7 +11,6 @@ module.exports	=
   {
      return new Promise((resolve, reject) =>
      {
-       //return (resolve())
        mongoose.connect(url, (err)=>
        {
          	if (err)
@@ -19,5 +19,5 @@ module.exports	=
           return (resolve())
       })
     })
-  }
+  } 
 }

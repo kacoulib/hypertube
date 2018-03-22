@@ -2,6 +2,7 @@
 
 let bcrypt				= require('bcrypt-nodejs'),
 		localStrategy	= require('passport-local').Strategy,
+		GoogleStrategy = require('passport-google-oauth20').Strategy,
 		User 					= require('../Models/User/user.js'),
 		saltRounds		= 10;
 
@@ -64,8 +65,6 @@ module.exports = function (passport)
 	},
 	function(req, email, password, next)
 	{
-		console.log('local-signup')
-
 		process.nextTick(function()
 		{
 			User.findOne({'email' :  email}, function(err, user)
@@ -78,11 +77,12 @@ module.exports = function (passport)
 
 				let newUser	= new User(
 				{
-					first_name	: req.body.first_name,
-					last_name	: req.body.last_name,
-					login	: req.body.login,
+					given_name	: req.body.given_name,
+					family_name	: req.body.family_name,
+					login		: req.body.login,
 					email		: req.body.email,
-					picture	: req.body.picture,
+					provider	: "local",
+					picture		: req.body.picture,
 				});
 
 				newUser.password = newUser.generateHash(password)
@@ -97,5 +97,62 @@ module.exports = function (passport)
 				});
 			});
 		});
-	}))
+	}));
+
+	passport.use(new GoogleStrategy(
+	{
+		clientID: process.env.GOOGLE_CLIENT_ID,
+		clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+		callbackURL: '/user/auth/google'
+	},
+		(accessToken, refreshToken, profile, next) =>
+		{
+			User.findOne({provider_user_id: profile.id, provider: 'google'}, (err, user) =>
+			{
+				if (err)
+					return next(err, user);
+				if (user)
+					return next(null, user)
+
+				let newUser,
+					photo = (profile._json ? profile._json.image.url: profile.photos ? (profile.photos[0] ? profile.photos[0].value : null) : null),
+					email = profile.emails ? profile.emails[0] ? profile.emails[0].value : null : null;
+
+
+				newUser	= new User(
+				{
+					given_name			: profile.name.givenName,
+					family_name			: profile.name.familyName,
+					login				: profile.login,
+					email				: email,
+					picture				: photo,
+					provider			: 'google',
+					provider_user_id	: profile.id
+				});
+
+				newUser.save((err)=>
+				{
+					if (err)
+						return next(err, user);
+
+					return next(err, newUser);
+				})
+
+			});
+		}
+	));
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+

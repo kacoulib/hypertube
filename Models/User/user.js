@@ -6,10 +6,19 @@ let	mongoose		= require('mongoose'),
 
 
 // Schema
-//email, pseudo, photo, nom, prénom, passe, pass_reset
 userSchema 	= new Schema(
 {
-	first_name:
+	provider:
+	{
+		required: true,
+		type : String,
+		enum: ['google', '42', 'local']
+	},
+	provider_user_id:
+	{
+		type : String,
+	},
+	given_name:
 	{
 		required: true,
 		type: String,
@@ -17,7 +26,7 @@ userSchema 	= new Schema(
 		trim: true,
 		validate: (str) => str.length > 2 && str.indexOf('$') < 0
 	},
-	last_name:
+	family_name:
 	{
 		required: true,
 		type: String,
@@ -27,7 +36,6 @@ userSchema 	= new Schema(
 	},
 	password:
 	{
-		required : true,
 		type : String,
 		validate: (str) => str.length > 2
 	},
@@ -45,8 +53,7 @@ userSchema 	= new Schema(
 	picture:
 	{
 		required: true,
-		type :[String],
-		validate : (pics) => pics.length < 5
+		type : String
 	},
 	reset_pass:
 	{
@@ -72,4 +79,4 @@ userSchema.methods.validPassword = function(password)
     	return (false);
 };
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model('Users', userSchema);
