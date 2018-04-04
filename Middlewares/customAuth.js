@@ -7,19 +7,21 @@ module.exports =
 {
 	auth42: (params, cb)=>
 	{
-		console.log(params)
-		let data =
+		let authorization_url = 'https://api.intra.42.fr/oauth/authoriz',
+			client_id = process.env.CLIENT_ID_42,
+			clientSecret = process.env.CLIENT_SECRET_42,
+			redirect_uri = "http://localhost:3000/user/auth/42",
+			tokenURL = 'https://api.intra.42.fr/oauth/token',
+			scope = 'public',
+			response_type = 'code';
+
+		if (!params.code)
 		{
-			authorizationURL: 'https://api.intra.42.fr/oauth/authorize',
-			tokenURL: 'https://api.intra.42.fr/oauth/token',
-			clientID: process.env.CLIENT_ID_42,
-			clientSecret: process.env.CLIENT_SECRET_42,
-			callbackURL: "http://localhost:3000/user/auth/42",
-			clientID: process.env.CLIENT_ID_42,
-			clientSecret: process.env.CLIENT_SECRET_42,
-		};
+			console.log(params)
+			return request.get(authorization_url, {client_id, redirect_uri, scope, response_type}, cb)
+		}
 
 
-		request.post('https://api.intra.42.fr/oauth/token', data, cb);
+		return request.post('https://api.intra.42.fr/oauth/token', data, cb);
 	}
 }

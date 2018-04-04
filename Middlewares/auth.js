@@ -3,6 +3,7 @@
 let bcrypt				= require('bcrypt-nodejs'),
 		localStrategy	= require('passport-local').Strategy,
 		GoogleStrategy = require('passport-google-oauth20').Strategy,
+		OAuth2Strategy = require('passport-oauth2'),
 		User 					= require('../Models/User/user.js'),
 		saltRounds		= 10;
 
@@ -141,4 +142,52 @@ module.exports = function (passport)
 			});
 		}
 	));
+
+
+	passport.use(new OAuth2Strategy(
+	{
+		// authorization_url: 'https://api.intra.42.fr/oauth/authorize',
+		// client_id: process.env.CLIENT_ID_42,
+		// clientSecret: process.env.CLIENT_SECRET_42,
+		// redirect_uri: "http://localhost:3000/user/auth/42",
+		// tokenURL: 'https://api.intra.42.fr/oauth/token',
+		scope: 'public',
+		response_type: 'code',
+
+		authorizationURL: 'https://api.intra.42.fr/oauth/authorize',
+		tokenURL: 'https://api.intra.42.fr/oauth/token',
+		clientID: process.env.CLIENT_ID_42,
+		clientSecret: process.env.CLIENT_SECRET_42,
+		callbackURL: 'http://localhost:3000/user/auth/42'
+	},
+		(accessToken, refreshToken, profile, next, err, user)=>
+		{
+			console.log(profile)
+			console.log(next)
+			console.log(err)
+			console.log(user)
+			// User.findOrCreate({ exampleId: profile.id }, function (err, user)
+			// {
+				return next(err, profile);
+			//});
+		}
+	));
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

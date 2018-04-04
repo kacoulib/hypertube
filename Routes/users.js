@@ -149,14 +149,25 @@ module.exports = function (app, passport, con)
 	app.get('/user/auth/42', (req, res, next) =>
 	{
 		let code;
-		//return  true;
-		console.log(customAuth.auth42)
-		customAuth.auth42({code}, (err)=>
+
+		passport.authenticate('oauth2', {scope: ['public']}, (err, user)=>
 		{
-			console.log(2)
-			if (err)
-				return (res.status(401).json({sucess: false, err}));
-		})
+			// if (err)
+			// 	return (res.status(401).json({sucess: false, err}));
+
+			//console.log(req.query.code)
+			res.json({succes: true, message: 'User authenticated successfuly'});
+
+		})(req, res, next);
+
+
+		// customAuth.auth42({code}, (err, data)=>
+		// {
+		// 	console.log(err)
+		// 	// console.log(data)
+		// 	//if (err)
+		// 		return (res.status(401).json({sucess: false, err}));
+		// })
 	})
 
 
