@@ -1,8 +1,8 @@
 'USE STRICT'
 
 let nodemailer	= require('nodemailer'),
-      auth = {},
-      transport;
+    auth = {},
+    transport;
 
 
 
@@ -27,9 +27,11 @@ module.exports =
         auth
       });
 
+      let to = 'liliv@mailtrix.net';
+
       transport.sendMail({
           from: "kacoulib ✔ <kaoculib@student.42.fr>", // sender address
-          to: "coulibaly91karim@gmail.com", // list of receivers
+          to, // list of receivers
           subject: "Matcha password reset", // Subject line
           html: "<b><a href='http://localhost:3001/pass_reset/"+ reset_key +"'>Link ✔</a></b>" // html body
       }, function(err, response)
